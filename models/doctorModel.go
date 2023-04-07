@@ -26,7 +26,7 @@ type DoctorDTO struct {
 }
 
 type GetDoctorDbResponse struct {
-	ID         primitive.ObjectID `bson:"id"`
+	ID         primitive.ObjectID `bson:"_id"`
 	UserId     string             `bson:"user_id"`
 	DoctorInfo DoctorInfo         `bson:"doctor_info"`
 	Patients   []Patient          `bson:"patients"`

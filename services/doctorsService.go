@@ -39,9 +39,20 @@ func (service DoctorsService) GetDoctors() ([]*models.DoctorDTO, error) {
 		return nil, err
 	}
 
-	var doctors []*models.DoctorDTO
-	if err := cursor.All(context.Background(), &doctors); err != nil {
+	var doctorsData []*models.GetDoctorDbResponse
+	if err := cursor.All(context.Background(), &doctorsData); err != nil {
 		return nil, err
+	}
+
+	var doctors []*models.DoctorDTO
+	for _, doctorData := range doctorsData {
+		doctor := models.DoctorDTO{
+			ID:         doctorData.ID,
+			UserId:     doctorData.UserId,
+			DoctorInfo: doctorData.DoctorInfo,
+			Patients:   doctorData.Patients,
+		}
+		doctors = append(doctors, &doctor)
 	}
 
 	return doctors, err
