@@ -1,7 +1,7 @@
 package main
 
 import (
-	configs "github.com/berkaymuratt/sep-app-api/config"
+	configs "github.com/berkaymuratt/sep-app-api/configs"
 	"github.com/berkaymuratt/sep-app-api/controllers"
 	"github.com/berkaymuratt/sep-app-api/routes"
 	"github.com/berkaymuratt/sep-app-api/services"
@@ -28,9 +28,12 @@ func main() {
 	app.Use(corsMiddleware)
 
 	doctorsService := services.NewDoctorsService()
-	doctorsController := controllers.NewDoctorsController(doctorsService)
+	patientsService := services.NewPatientsService()
 
-	allRoutes := routes.NewRoutes(app, doctorsController)
+	doctorsController := controllers.NewDoctorsController(doctorsService)
+	patientsController := controllers.NewPatientsController(patientsService)
+
+	allRoutes := routes.NewRoutes(app, doctorsController, patientsController)
 	allRoutes.DefineRoutes()
 
 	if err := app.Listen("localhost:8080"); err != nil {

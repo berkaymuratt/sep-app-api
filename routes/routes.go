@@ -6,25 +6,20 @@ import (
 )
 
 type Routes struct {
-	app               *fiber.App
-	doctorsController controllers.DoctorsController
+	app                *fiber.App
+	doctorsController  controllers.DoctorsController
+	patientsController controllers.PatientsController
 }
 
-func NewRoutes(app *fiber.App, doctorsController controllers.DoctorsController) Routes {
+func NewRoutes(app *fiber.App, doctorsController controllers.DoctorsController, patientsController controllers.PatientsController) Routes {
 	return Routes{
-		app:               app,
-		doctorsController: doctorsController,
+		app:                app,
+		doctorsController:  doctorsController,
+		patientsController: patientsController,
 	}
 }
 
 func (routes Routes) DefineRoutes() {
 	routes.defineDoctorsRoutes()
-}
-
-func (routes Routes) defineDoctorsRoutes() {
-	app := routes.app
-	controller := routes.doctorsController
-
-	doctorsRoutes := app.Group("/api/doctors")
-	doctorsRoutes.Get("/", controller.GetDoctors)
+	routes.definePatientsRoutes()
 }

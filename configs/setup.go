@@ -23,10 +23,11 @@ func ConnectDB() *mongo.Client {
 		log.Fatalln(err)
 	}
 
+	DB = client
 	return client
 }
 
-var DB *mongo.Client = ConnectDB()
+var DB *mongo.Client
 
 func GetCollection(collectionName string) *mongo.Collection {
 	return DB.Database("SepAppDB").Collection(collectionName)
