@@ -19,7 +19,7 @@ type DoctorInfo struct {
 }
 
 type DoctorDTO struct {
-	ID         primitive.ObjectID `bson:"id" json:"id"`
+	ID         primitive.ObjectID `json:"id"`
 	UserId     string             `json:"user_id"`
 	DoctorInfo DoctorInfo         `json:"doctor_info"`
 	Patients   []Patient          `json:"patients"`
