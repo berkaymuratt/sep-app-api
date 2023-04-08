@@ -1,7 +1,8 @@
 package controllers
 
 import (
-	"github.com/berkaymuratt/sep-app-api/models/patient"
+	"github.com/berkaymuratt/sep-app-api/Dtos"
+	"github.com/berkaymuratt/sep-app-api/models"
 	"github.com/berkaymuratt/sep-app-api/services"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -20,7 +21,7 @@ func NewPatientsController(patientsService services.PatientsService) PatientsCon
 func (controller PatientsController) GetPatients(ctx *fiber.Ctx) error {
 	patientsService := controller.patientsService
 
-	var patients []*models.GetPatientResponse
+	var patients []*Dtos.GetPatientResponse
 	var err error
 
 	var doctorId primitive.ObjectID
@@ -68,7 +69,7 @@ func (controller PatientsController) GetPatientById(ctx *fiber.Ctx) error {
 func (controller PatientsController) AddPatient(ctx *fiber.Ctx) error {
 	patientsService := controller.patientsService
 
-	var request models.AddPatientRequest
+	var request Dtos.AddPatientRequest
 	if err := ctx.BodyParser(&request); err != nil {
 		return handleError(ctx, "Invalid Patient Data")
 	}

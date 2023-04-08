@@ -3,8 +3,10 @@ package services
 import (
 	"context"
 	"errors"
+	"github.com/berkaymuratt/sep-app-api/DbDtos"
+	"github.com/berkaymuratt/sep-app-api/Dtos"
 	"github.com/berkaymuratt/sep-app-api/configs"
-	"github.com/berkaymuratt/sep-app-api/models/patient"
+	"github.com/berkaymuratt/sep-app-api/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
@@ -16,7 +18,7 @@ func NewPatientsService() PatientsService {
 	return PatientsService{}
 }
 
-func (service PatientsService) GetPatients() ([]*models.GetPatientResponse, error) {
+func (service PatientsService) GetPatients() ([]*Dtos.GetPatientResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -39,15 +41,15 @@ func (service PatientsService) GetPatients() ([]*models.GetPatientResponse, erro
 		return nil, err
 	}
 
-	var result []models.GetPatientDbResponse
+	var result []DbDtos.GetPatientDbResponse
 	if err := cursor.All(context.Background(), &result); err != nil {
 		return nil, err
 	}
 
-	var patients []*models.GetPatientResponse
+	var patients []*Dtos.GetPatientResponse
 
 	for _, data := range result {
-		patientDTO := models.GetPatientResponse{
+		patientDTO := Dtos.GetPatientResponse{
 			ID:          data.ID,
 			DoctorId:    data.DoctorId,
 			UserId:      data.UserId,
@@ -61,11 +63,10 @@ func (service PatientsService) GetPatients() ([]*models.GetPatientResponse, erro
 	return patients, err
 }
 
-func (service PatientsService) GetPatientsByDoctorId(doctorId primitive.ObjectID) ([]*models.GetPatientResponse, error) {
+func (service PatientsService) GetPatientsByDoctorId(doctorId primitive.ObjectID) ([]*Dtos.GetPatientResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	var patients []*models.GetPatientResponse
 	coll := configs.GetCollection("patients")
 
 	pipeline := bson.A{
@@ -90,13 +91,15 @@ func (service PatientsService) GetPatientsByDoctorId(doctorId primitive.ObjectID
 		return nil, err
 	}
 
-	var result []models.GetPatientDbResponse
+	var result []DbDtos.GetPatientDbResponse
 	if err := cursor.All(context.Background(), &result); err != nil {
 		return nil, err
 	}
 
+	var patients []*Dtos.GetPatientResponse
+
 	for _, data := range result {
-		patientDTO := models.GetPatientResponse{
+		patientDTO := Dtos.GetPatientResponse{
 			ID:          data.ID,
 			DoctorId:    data.DoctorId,
 			UserId:      data.UserId,
@@ -113,7 +116,7 @@ func (service PatientsService) GetPatientsByDoctorId(doctorId primitive.ObjectID
 	return patients, err
 }
 
-func (service PatientsService) GetPatientById(patientId primitive.ObjectID) (*models.GetPatientResponse, error) {
+func (service PatientsService) GetPatientById(patientId primitive.ObjectID) (*Dtos.GetPatientResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -140,17 +143,17 @@ func (service PatientsService) GetPatientById(patientId primitive.ObjectID) (*mo
 		return nil, err
 	}
 
-	var result []*models.GetPatientDbResponse
+	var result []*DbDtos.GetPatientDbResponse
 	if err := cursor.All(context.Background(), &result); err != nil {
 		return nil, err
 	}
 
 	if len(result) != 1 && len(result[0].Doctors) != 1 {
-		return nil, errors.New("doctor cannot found")
+		return nil, errors.New("doctor_models cannot found")
 	}
 
 	patientData := result[0]
-	patient := models.GetPatientResponse{
+	patient := Dtos.GetPatientResponse{
 		ID:          patientData.ID,
 		DoctorId:    patientData.DoctorId,
 		UserId:      patientData.UserId,
