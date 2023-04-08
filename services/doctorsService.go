@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/berkaymuratt/sep-app-api/configs"
-	"github.com/berkaymuratt/sep-app-api/models"
+	models "github.com/berkaymuratt/sep-app-api/models/doctor"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
@@ -16,7 +16,7 @@ func NewDoctorsService() DoctorsService {
 	return DoctorsService{}
 }
 
-func (service DoctorsService) GetDoctors() ([]*models.DoctorDTO, error) {
+func (service DoctorsService) GetDoctors() ([]*models.GetDoctorResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -44,9 +44,9 @@ func (service DoctorsService) GetDoctors() ([]*models.DoctorDTO, error) {
 		return nil, err
 	}
 
-	var doctors []*models.DoctorDTO
+	var doctors []*models.GetDoctorResponse
 	for _, doctorData := range doctorsData {
-		doctor := models.DoctorDTO{
+		doctor := models.GetDoctorResponse{
 			ID:         doctorData.ID,
 			UserId:     doctorData.UserId,
 			DoctorInfo: doctorData.DoctorInfo,
@@ -58,7 +58,7 @@ func (service DoctorsService) GetDoctors() ([]*models.DoctorDTO, error) {
 	return doctors, err
 }
 
-func (service DoctorsService) GetDoctorById(doctorId primitive.ObjectID) (*models.DoctorDTO, error) {
+func (service DoctorsService) GetDoctorById(doctorId primitive.ObjectID) (*models.GetDoctorResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -96,7 +96,7 @@ func (service DoctorsService) GetDoctorById(doctorId primitive.ObjectID) (*model
 	}
 
 	doctorData := result[0]
-	doctor := models.DoctorDTO{
+	doctor := models.GetDoctorResponse{
 		ID:         doctorData.ID,
 		UserId:     doctorData.UserId,
 		DoctorInfo: doctorData.DoctorInfo,

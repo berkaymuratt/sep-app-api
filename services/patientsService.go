@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/berkaymuratt/sep-app-api/configs"
-	"github.com/berkaymuratt/sep-app-api/models"
+	"github.com/berkaymuratt/sep-app-api/models/patient"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
@@ -16,11 +16,10 @@ func NewPatientsService() PatientsService {
 	return PatientsService{}
 }
 
-func (service PatientsService) GetPatients() ([]*models.PatientDTO, error) {
+func (service PatientsService) GetPatients() ([]*models.GetPatientResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	var patients []*models.PatientDTO
 	coll := configs.GetCollection("patients")
 
 	pipeline := bson.A{
@@ -45,8 +44,10 @@ func (service PatientsService) GetPatients() ([]*models.PatientDTO, error) {
 		return nil, err
 	}
 
+	var patients []*models.GetPatientResponse
+
 	for _, data := range result {
-		patientDTO := models.PatientDTO{
+		patientDTO := models.GetPatientResponse{
 			ID:          data.ID,
 			DoctorId:    data.DoctorId,
 			UserId:      data.UserId,
@@ -60,11 +61,11 @@ func (service PatientsService) GetPatients() ([]*models.PatientDTO, error) {
 	return patients, err
 }
 
-func (service PatientsService) GetPatientsByDoctorId(doctorId primitive.ObjectID) ([]*models.PatientDTO, error) {
+func (service PatientsService) GetPatientsByDoctorId(doctorId primitive.ObjectID) ([]*models.GetPatientResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	var patients []*models.PatientDTO
+	var patients []*models.GetPatientResponse
 	coll := configs.GetCollection("patients")
 
 	pipeline := bson.A{
@@ -95,7 +96,7 @@ func (service PatientsService) GetPatientsByDoctorId(doctorId primitive.ObjectID
 	}
 
 	for _, data := range result {
-		patientDTO := models.PatientDTO{
+		patientDTO := models.GetPatientResponse{
 			ID:          data.ID,
 			DoctorId:    data.DoctorId,
 			UserId:      data.UserId,
@@ -112,7 +113,7 @@ func (service PatientsService) GetPatientsByDoctorId(doctorId primitive.ObjectID
 	return patients, err
 }
 
-func (service PatientsService) GetPatientById(patientId primitive.ObjectID) (*models.PatientDTO, error) {
+func (service PatientsService) GetPatientById(patientId primitive.ObjectID) (*models.GetPatientResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -149,7 +150,7 @@ func (service PatientsService) GetPatientById(patientId primitive.ObjectID) (*mo
 	}
 
 	patientData := result[0]
-	patient := models.PatientDTO{
+	patient := models.GetPatientResponse{
 		ID:          patientData.ID,
 		DoctorId:    patientData.DoctorId,
 		UserId:      patientData.UserId,
