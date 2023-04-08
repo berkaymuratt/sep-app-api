@@ -57,6 +57,10 @@ func (controller DoctorsController) AddDoctor(ctx *fiber.Ctx) error {
 		return handleError(ctx, "Invalid Patient Data")
 	}
 
+	if doctorsService.IsUserIdExist(request.UserId) {
+		return handleError(ctx, "user_id has already exist in the system")
+	}
+
 	newDoctor := models.Doctor{
 		UserId:       request.UserId,
 		UserPassword: request.UserPassword,

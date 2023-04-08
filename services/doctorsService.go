@@ -9,6 +9,7 @@ import (
 	"github.com/berkaymuratt/sep-app-api/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"time"
 )
 
@@ -154,4 +155,25 @@ func (service DoctorsService) AddDoctor(doctor models.Doctor) error {
 	}
 
 	return nil
+}
+
+func (service DoctorsService) IsUserIdExist(userId string) bool {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	pipeline := bson.D{{"$match", bson.D{{"user_id", userId}}}}
+
+	var err error
+	var cursor *mongo.Cursor
+
+	if cursor, err = configs.GetCollection("doctors").Aggregate(ctx, pipeline); err != nil {
+		return true
+	}
+
+	var result []dbDtos.GetDoctorDbResponse
+	if err := cursor.All(context.Background(), &result); err != nil {
+		return true
+	}
+
+	return len(result) > 0
 }
