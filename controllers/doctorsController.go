@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/berkaymuratt/sep-app-api/Dtos"
+	"github.com/berkaymuratt/sep-app-api/dtos"
 	"github.com/berkaymuratt/sep-app-api/models"
 	"github.com/berkaymuratt/sep-app-api/services"
 	"github.com/gofiber/fiber/v2"
@@ -52,7 +52,7 @@ func (controller DoctorsController) GetDoctorById(ctx *fiber.Ctx) error {
 func (controller DoctorsController) AddDoctor(ctx *fiber.Ctx) error {
 	doctorsService := controller.doctorsService
 
-	var request Dtos.AddDoctorRequest
+	var request dtos.DoctorDto
 	if err := ctx.BodyParser(&request); err != nil {
 		return handleError(ctx, "Invalid Patient Data")
 	}

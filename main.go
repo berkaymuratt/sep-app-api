@@ -13,7 +13,6 @@ import (
 func main() {
 
 	configs.ConnectDB()
-
 	app := fiber.New()
 	app.Use(logger.New())
 
@@ -29,11 +28,13 @@ func main() {
 
 	doctorsService := services.NewDoctorsService()
 	patientsService := services.NewPatientsService()
+	reportsService := services.NewReportsService()
 
 	doctorsController := controllers.NewDoctorsController(doctorsService)
 	patientsController := controllers.NewPatientsController(patientsService)
+	reportsController := controllers.NewReportsController(reportsService)
 
-	allRoutes := routes.NewRoutes(app, doctorsController, patientsController)
+	allRoutes := routes.NewRoutes(app, doctorsController, patientsController, reportsController)
 	allRoutes.DefineRoutes()
 
 	if err := app.Listen("localhost:8080"); err != nil {
