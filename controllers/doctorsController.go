@@ -48,7 +48,7 @@ func (controller DoctorsController) GetDoctorById(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(patient)
 }
 
-func (controller DoctorsController) AddPatient(ctx *fiber.Ctx) error {
+func (controller DoctorsController) AddDoctor(ctx *fiber.Ctx) error {
 	var err error
 	doctorsService := controller.doctorsService
 
