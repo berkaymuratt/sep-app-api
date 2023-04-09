@@ -135,13 +135,17 @@ func (service PatientsService) IsUserIdExist(userId string) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	pipeline := bson.D{{"$match", bson.D{{"user_id", userId}}}}
+	pipeline := bson.A{
+		bson.M{
+			"$match": bson.M{"user_id": userId},
+		},
+	}
 
 	var err error
 	var cursor *mongo.Cursor
 
 	if cursor, err = configs.GetCollection("patients").Aggregate(ctx, pipeline); err != nil {
-		return true
+		return false
 	}
 
 	var result []models.Patient
