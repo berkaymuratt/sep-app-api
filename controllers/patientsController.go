@@ -93,3 +93,25 @@ func (controller PatientsController) AddPatient(ctx *fiber.Ctx) error {
 		"message": "successful",
 	})
 }
+
+func (controller PatientsController) UpdatePatient(ctx *fiber.Ctx) error {
+	idStr := ctx.Params("id")
+	patientId, err := primitive.ObjectIDFromHex(idStr)
+
+	if err != nil {
+		return handleError(ctx, "invalid patient_id")
+	}
+
+	var request dtos.PatientDto
+	if err := ctx.BodyParser(&request); err != nil {
+		return handleError(ctx, "invalid patient data")
+	}
+
+	if err := controller.patientsService.UpdatePatient(patientId, request); err != nil {
+		return handleError(ctx, err.Error())
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "successful",
+	})
+}

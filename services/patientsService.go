@@ -131,6 +131,23 @@ func (service PatientsService) AddPatient(patient models.Patient) error {
 	return nil
 }
 
+func (service PatientsService) UpdatePatient(patientId primitive.ObjectID, newPatientDto dtos.PatientDto) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	coll := configs.GetCollection("patients")
+
+	update := bson.M{
+		"$set": bson.M{
+			"_doctor_id":   newPatientDto.DoctorId,
+			"patient_info": newPatientDto.PatientInfo,
+		},
+	}
+
+	_, err := coll.UpdateByID(ctx, patientId, update)
+	return err
+}
+
 func (service PatientsService) IsUserIdExist(userId string) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

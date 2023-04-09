@@ -7,5 +7,6 @@ func (routes Routes) definePatientsRoutes() {
 	patientsRoutes := app.Group("/api/patients")
 	patientsRoutes.Get("/", controller.GetPatients)
 	patientsRoutes.Get("/:id", controller.GetPatientById)
+	patientsRoutes.Patch("/:id", controller.UpdatePatient)
 	patientsRoutes.Post("/", controller.AddPatient)
 }
