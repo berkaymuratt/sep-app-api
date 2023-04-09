@@ -6,6 +6,7 @@ import (
 	"github.com/berkaymuratt/sep-app-api/configs"
 	"github.com/berkaymuratt/sep-app-api/dbdtos"
 	"github.com/berkaymuratt/sep-app-api/dtos"
+	"github.com/berkaymuratt/sep-app-api/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -63,6 +64,58 @@ func (service ReportsService) GetReportById(reportId primitive.ObjectID) (*dtos.
 	}
 
 	return dtos.ReportDtoFromReportDbResponse(reportData, symptomsDtos, diseasesDtos)
+}
+
+func (service ReportsService) CreateReport(appointment *models.Appointment) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	coll := configs.GetCollection("diseases")
+
+	pipeline := bson.A{
+		bson.M{
+			"$match": bson.M{
+				"_symptom_ids": bson.M{
+					"$all": appointment.SymptomIds,
+				},
+			},
+		},
+	}
+
+	cursor, err := coll.Aggregate(ctx, pipeline)
+
+	if err != nil {
+		return err
+	}
+
+	var diseases []*models.Disease
+	if err := cursor.All(context.Background(), &diseases); err != nil {
+		return err
+	}
+
+	var possibleDiseaseIds []primitive.ObjectID
+	for _, disease := range diseases {
+		possibleDiseaseIds = append(possibleDiseaseIds, disease.ID)
+	}
+
+	report := models.Report{
+		DoctorId:           appointment.DoctorId,
+		PatientId:          appointment.PatientId,
+		SymptomIds:         appointment.SymptomIds,
+		PossibleDiseaseIds: possibleDiseaseIds,
+		DoctorFeedback:     "",
+		PatientNote:        appointment.PatientNote,
+		CreatedAt:          time.Now(),
+	}
+
+	res, err := configs.GetCollection("reports").InsertOne(ctx, report)
+
+	if err != nil {
+		return err
+	}
+
+	appointment.ReportId = res.InsertedID.(primitive.ObjectID)
+	return err
 }
 
 func (service ReportsService) getReportsCursor(ctx context.Context, matchField string, matchValue any) (*mongo.Cursor, error) {

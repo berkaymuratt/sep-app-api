@@ -6,6 +6,7 @@ import (
 	"github.com/berkaymuratt/sep-app-api/configs"
 	"github.com/berkaymuratt/sep-app-api/dbdtos"
 	"github.com/berkaymuratt/sep-app-api/dtos"
+	"github.com/berkaymuratt/sep-app-api/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -84,6 +85,69 @@ func (service AppointmentsService) GetAppointmentByDoctor(doctorId primitive.Obj
 	}
 
 	return appointmentsDtos, err
+}
+
+func (service AppointmentsService) AddAppointment(newAppointment models.Appointment) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	_, err := configs.GetCollection("appointments").InsertOne(ctx, newAppointment)
+	return err
+}
+
+func (service AppointmentsService) IsDateAvailable(doctorId primitive.ObjectID, patientId primitive.ObjectID, date time.Time) bool {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	coll := configs.GetCollection("appointments")
+
+	pipeline := bson.A{
+		bson.M{
+			"$match": bson.M{
+				"$or": bson.A{
+					bson.M{
+						"$and": bson.A{
+							bson.M{
+								"_doctor_id": doctorId,
+							},
+							bson.M{
+								"date": bson.M{
+									"$gte": date.Add(-1 * time.Hour),
+									"$lte": date.Add(1 * time.Hour),
+								},
+							},
+						},
+					},
+					bson.M{
+						"$and": bson.A{
+							bson.M{
+								"_patient_id": patientId,
+							},
+							bson.M{
+								"date": bson.M{
+									"$gte": date.Add(-1 * time.Hour),
+									"$lte": date.Add(1 * time.Hour),
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	cursor, err := coll.Aggregate(ctx, pipeline)
+
+	if err != nil {
+		return false
+	}
+
+	var appointments []*models.Appointment
+	if err := cursor.All(ctx, &appointments); err != nil {
+		return false
+	}
+
+	return len(appointments) == 0
 }
 
 func (service AppointmentsService) getAppointmentsCursor(ctx context.Context, matchField string, matchValue any) (*mongo.Cursor, error) {

@@ -12,6 +12,6 @@ type Report struct {
 	SymptomIds         []primitive.ObjectID `bson:"_symptom_ids"`
 	PossibleDiseaseIds []primitive.ObjectID `bson:"_possible_disease_ids"`
 	DoctorFeedback     string               `bson:"doctor_feedback"`
-	PatientNode        string               `bson:"patient_note"`
+	PatientNote        string               `bson:"patient_note"`
 	CreatedAt          time.Time            `bson:"created_at"`
 }

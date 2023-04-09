@@ -1,6 +1,9 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"time"
+)
 
 type Appointment struct {
 	ID          primitive.ObjectID   `bson:"_id"`
@@ -9,5 +12,5 @@ type Appointment struct {
 	ReportId    primitive.ObjectID   `bson:"_report_id"`
 	SymptomIds  []primitive.ObjectID `bson:"_symptom_ids"`
 	PatientNote string               `bson:"patient_note"`
-	Date        string               `bson:"date"`
+	Date        time.Time            `bson:"date"`
 }

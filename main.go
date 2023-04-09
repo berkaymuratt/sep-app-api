@@ -37,7 +37,7 @@ func main() {
 	doctorsController := controllers.NewDoctorsController(doctorsService)
 	patientsController := controllers.NewPatientsController(patientsService)
 	reportsController := controllers.NewReportsController(reportsService)
-	appointmentsController := controllers.NewAppointmentsController(appointmentsService)
+	appointmentsController := controllers.NewAppointmentsController(appointmentsService, reportsService)
 	symptomsController := controllers.NewSymptomsController(symptomsService)
 	bodyPartsController := controllers.NewBodyPartsController(bodyPartsService)
 	diseasesController := controllers.NewDiseasesController(diseasesService)
