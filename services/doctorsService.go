@@ -100,6 +100,22 @@ func (service DoctorsService) AddDoctor(doctor models.Doctor) error {
 	return nil
 }
 
+func (service DoctorsService) UpdateDoctor(doctorId primitive.ObjectID, newDoctorDto dtos.DoctorDto) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	coll := configs.GetCollection("doctors")
+
+	update := bson.M{
+		"$set": bson.M{
+			"doctor_info": newDoctorDto.DoctorInfo,
+		},
+	}
+
+	_, err := coll.UpdateByID(ctx, doctorId, update)
+	return err
+}
+
 func (service DoctorsService) IsUserIdExist(userId string) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

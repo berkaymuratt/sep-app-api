@@ -75,3 +75,25 @@ func (controller DoctorsController) AddDoctor(ctx *fiber.Ctx) error {
 		"message": "successful",
 	})
 }
+
+func (controller DoctorsController) UpdateDoctor(ctx *fiber.Ctx) error {
+	idStr := ctx.Params("id")
+	doctorId, err := primitive.ObjectIDFromHex(idStr)
+
+	if err != nil {
+		return handleError(ctx, "invalid doctor_id")
+	}
+
+	var doctorDto dtos.DoctorDto
+	if err := ctx.BodyParser(&doctorDto); err != nil {
+		return handleError(ctx, "invalid doctor data")
+	}
+
+	if err := controller.doctorsService.UpdateDoctor(doctorId, doctorDto); err != nil {
+		return handleError(ctx, err.Error())
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "successful",
+	})
+}
