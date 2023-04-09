@@ -29,12 +29,15 @@ func main() {
 	doctorsService := services.NewDoctorsService()
 	patientsService := services.NewPatientsService()
 	reportsService := services.NewReportsService()
+	symptomsService := services.NewSymptomService()
+	appointmentsService := services.NewAppointmentsService(symptomsService)
 
 	doctorsController := controllers.NewDoctorsController(doctorsService)
 	patientsController := controllers.NewPatientsController(patientsService)
 	reportsController := controllers.NewReportsController(reportsService)
+	appointmentsController := controllers.NewAppointmentsController(appointmentsService)
 
-	allRoutes := routes.NewRoutes(app, doctorsController, patientsController, reportsController)
+	allRoutes := routes.NewRoutes(app, doctorsController, patientsController, reportsController, appointmentsController)
 	allRoutes.DefineRoutes()
 
 	if err := app.Listen("localhost:8080"); err != nil {
