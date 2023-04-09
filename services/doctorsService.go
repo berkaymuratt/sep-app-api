@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/berkaymuratt/sep-app-api/configs"
-	"github.com/berkaymuratt/sep-app-api/dbDtos"
+	"github.com/berkaymuratt/sep-app-api/dbdtos"
 	"github.com/berkaymuratt/sep-app-api/dtos"
 	"github.com/berkaymuratt/sep-app-api/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -42,7 +42,7 @@ func (service DoctorsService) GetDoctors() ([]*dtos.DoctorDto, error) {
 		return nil, err
 	}
 
-	var doctorsData []*dbDtos.GetDoctorDbResponse
+	var doctorsData []*dbdtos.GetDoctorDbResponse
 	if err := cursor.All(context.Background(), &doctorsData); err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func (service DoctorsService) GetDoctorById(doctorId primitive.ObjectID) (*dtos.
 		return nil, err
 	}
 
-	var result []*dbDtos.GetDoctorDbResponse
+	var result []*dbdtos.GetDoctorDbResponse
 	if err := cursor.All(context.Background(), &result); err != nil {
 		return nil, err
 	}
@@ -170,7 +170,7 @@ func (service DoctorsService) IsUserIdExist(userId string) bool {
 		return true
 	}
 
-	var result []dbDtos.GetDoctorDbResponse
+	var result []dbdtos.GetDoctorDbResponse
 	if err := cursor.All(context.Background(), &result); err != nil {
 		return true
 	}

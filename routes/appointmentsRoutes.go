@@ -4,7 +4,7 @@ func (routes Routes) defineAppointmentsRoutes() {
 	app := routes.app
 	controller := routes.appointmentsController
 
-	doctorsRoutes := app.Group("/api/appointments")
-	doctorsRoutes.Get("/:id", controller.GetAppointmentById)
+	appointmentsRoutes := app.Group("/api/appointments")
+	appointmentsRoutes.Get("/:id", controller.GetAppointmentById)
 
 }

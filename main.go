@@ -1,7 +1,7 @@
 package main
 
 import (
-	configs "github.com/berkaymuratt/sep-app-api/configs"
+	"github.com/berkaymuratt/sep-app-api/configs"
 	"github.com/berkaymuratt/sep-app-api/controllers"
 	"github.com/berkaymuratt/sep-app-api/routes"
 	"github.com/berkaymuratt/sep-app-api/services"
@@ -30,14 +30,25 @@ func main() {
 	patientsService := services.NewPatientsService()
 	reportsService := services.NewReportsService()
 	symptomsService := services.NewSymptomService()
+	bodyPartsService := services.NewBodyPartsService()
 	appointmentsService := services.NewAppointmentsService(symptomsService)
 
 	doctorsController := controllers.NewDoctorsController(doctorsService)
 	patientsController := controllers.NewPatientsController(patientsService)
 	reportsController := controllers.NewReportsController(reportsService)
 	appointmentsController := controllers.NewAppointmentsController(appointmentsService)
+	symptomsController := controllers.NewSymptomsController(symptomsService)
+	bodyPartsController := controllers.NewBodyPartsController(bodyPartsService)
 
-	allRoutes := routes.NewRoutes(app, doctorsController, patientsController, reportsController, appointmentsController)
+	allRoutes := routes.NewRoutes(
+		app,
+		doctorsController,
+		patientsController,
+		reportsController,
+		appointmentsController,
+		symptomsController,
+		bodyPartsController,
+	)
 	allRoutes.DefineRoutes()
 
 	if err := app.Listen("localhost:8080"); err != nil {

@@ -6,8 +6,8 @@ import (
 )
 
 type SymptomDto struct {
-	ID            primitive.ObjectID `json:"id"`
-	BodyPart      *models.BodyPart   `json:"body_part,omitempty"`
-	Name          string             `json:"name"`
-	PainIntensity int                `json:"pain_intensity"`
+	ID       primitive.ObjectID `json:"id"`
+	BodyPart *models.BodyPart   `json:"body_part,omitempty"`
+	Name     string             `json:"name"`
+	Level    int                `json:"level"`
 }

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/berkaymuratt/sep-app-api/configs"
-	"github.com/berkaymuratt/sep-app-api/dbDtos"
+	"github.com/berkaymuratt/sep-app-api/dbdtos"
 	"github.com/berkaymuratt/sep-app-api/dtos"
 	"github.com/berkaymuratt/sep-app-api/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -42,7 +42,7 @@ func (service PatientsService) GetPatients() ([]*dtos.PatientDto, error) {
 		return nil, err
 	}
 
-	var result []dbDtos.GetPatientDbResponse
+	var result []dbdtos.GetPatientDbResponse
 	if err := cursor.All(context.Background(), &result); err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func (service PatientsService) GetPatientsByDoctorId(doctorId primitive.ObjectID
 		return nil, err
 	}
 
-	var result []dbDtos.GetPatientDbResponse
+	var result []dbdtos.GetPatientDbResponse
 	if err := cursor.All(context.Background(), &result); err != nil {
 		return nil, err
 	}
@@ -156,7 +156,7 @@ func (service PatientsService) GetPatientById(patientId primitive.ObjectID) (*dt
 		return nil, err
 	}
 
-	var result []*dbDtos.GetPatientDbResponse
+	var result []*dbdtos.GetPatientDbResponse
 	if err := cursor.All(context.Background(), &result); err != nil {
 		return nil, err
 	}
@@ -219,7 +219,7 @@ func (service PatientsService) IsUserIdExist(userId string) bool {
 		return true
 	}
 
-	var result []dbDtos.GetPatientDbResponse
+	var result []dbdtos.GetPatientDbResponse
 	if err := cursor.All(context.Background(), &result); err != nil {
 		return true
 	}

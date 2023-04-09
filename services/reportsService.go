@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/berkaymuratt/sep-app-api/configs"
-	"github.com/berkaymuratt/sep-app-api/dbDtos"
+	"github.com/berkaymuratt/sep-app-api/dbdtos"
 	"github.com/berkaymuratt/sep-app-api/dtos"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -68,7 +68,7 @@ func (service ReportsService) GetReport(reportId primitive.ObjectID) (*dtos.Repo
 		return nil, err
 	}
 
-	var result []*dbDtos.GetReportDbResponse
+	var result []*dbdtos.GetReportDbResponse
 	if err := cursor.All(context.Background(), &result); err != nil {
 		return nil, err
 	}

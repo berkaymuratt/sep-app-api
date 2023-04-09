@@ -1,4 +1,4 @@
-package dbDtos
+package dbdtos
 
 import (
 	"github.com/berkaymuratt/sep-app-api/models"

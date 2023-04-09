@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/berkaymuratt/sep-app-api/configs"
-	"github.com/berkaymuratt/sep-app-api/dbDtos"
+	"github.com/berkaymuratt/sep-app-api/dbdtos"
 	"github.com/berkaymuratt/sep-app-api/dtos"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -65,7 +65,7 @@ func (service AppointmentsService) GetAppointment(appointmentId primitive.Object
 		return nil, err
 	}
 
-	var result []*dbDtos.GetAppointmentDbResponse
+	var result []*dbdtos.GetAppointmentDbResponse
 	if err := cursor.All(context.Background(), &result); err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (service AppointmentsService) GetAppointment(appointmentId primitive.Object
 	}
 
 	appointmentData := result[0]
-	var symptomsData []dbDtos.GetSymptomDbResponse
+	var symptomsData []dbdtos.GetSymptomDbResponse
 
 	if symptomsData, err = service.symptomsService.GetSymptomsByIds(appointmentData.SymptomIds); err != nil {
 		return nil, err
@@ -100,10 +100,10 @@ func (service AppointmentsService) GetAppointment(appointmentId primitive.Object
 
 	for _, symptom := range symptomsData {
 		symptomDto := dtos.SymptomDto{
-			ID:            symptom.ID,
-			BodyPart:      &symptom.BodyParts[0],
-			Name:          symptom.Name,
-			PainIntensity: symptom.PainIntensity,
+			ID:       symptom.ID,
+			BodyPart: &symptom.BodyParts[0],
+			Name:     symptom.Name,
+			Level:    symptom.Level,
 		}
 		symptomsDtos = append(symptomsDtos, &symptomDto)
 	}
