@@ -24,7 +24,7 @@ func (controller ReportsController) GetReport(ctx *fiber.Ctx) error {
 		return handleError(ctx, "invalid report id")
 	}
 
-	report, err := controller.reportsService.GetReport(reportId)
+	report, err := controller.reportsService.GetReportById(reportId)
 
 	if err != nil {
 		return handleError(ctx, "Error is occurred")

@@ -8,6 +8,7 @@ import (
 	"github.com/berkaymuratt/sep-app-api/dtos"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"time"
 )
 
@@ -21,10 +22,71 @@ func NewAppointmentsService(symptomsService SymptomsService) AppointmentsService
 	}
 }
 
-func (service AppointmentsService) GetAppointment(appointmentId primitive.ObjectID) (*dtos.AppointmentDto, error) {
+func (service AppointmentsService) GetAppointmentById(appointmentId primitive.ObjectID) (*dtos.AppointmentDto, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	cursor, err := service.getAppointmentsCursor(ctx, "_id", appointmentId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*dbdtos.GetAppointmentDbResponse
+	if err := cursor.All(context.Background(), &result); err != nil {
+		return nil, err
+	}
+
+	if len(result) != 1 {
+		return nil, errors.New("appointment cannot found")
+	}
+
+	appointmentData := result[0]
+
+	var symptomsDto []*dtos.SymptomDto
+	if symptomsDto, err = service.symptomsService.GetSymptomsByIds(appointmentData.SymptomIds); err != nil {
+		return nil, err
+	}
+
+	return dtos.AppointmentDtoFromAppointmentResponse(appointmentData, symptomsDto)
+}
+
+func (service AppointmentsService) GetAppointmentByDoctor(doctorId primitive.ObjectID) ([]*dtos.AppointmentDto, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	cursor, err := service.getAppointmentsCursor(ctx, "_doctor_id", doctorId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*dbdtos.GetAppointmentDbResponse
+	if err := cursor.All(context.Background(), &result); err != nil {
+		return nil, err
+	}
+
+	var appointmentsDtos []*dtos.AppointmentDto
+
+	for _, appointmentData := range result {
+		var symptomsDto []*dtos.SymptomDto
+		if symptomsDto, err = service.symptomsService.GetSymptomsByIds(appointmentData.SymptomIds); err != nil {
+			return nil, err
+		}
+
+		appointmentDto, err := dtos.AppointmentDtoFromAppointmentResponse(appointmentData, symptomsDto)
+
+		if err != nil {
+			return nil, err
+		}
+
+		appointmentsDtos = append(appointmentsDtos, appointmentDto)
+	}
+
+	return appointmentsDtos, err
+}
+
+func (service AppointmentsService) getAppointmentsCursor(ctx context.Context, matchField string, matchValue any) (*mongo.Cursor, error) {
 	coll := configs.GetCollection("appointments")
 
 	pipeline := bson.A{
@@ -52,71 +114,15 @@ func (service AppointmentsService) GetAppointment(appointmentId primitive.Object
 				"as":           "reports",
 			},
 		},
-		bson.M{
+	}
+
+	if matchField != "" {
+		pipeline = append(pipeline, bson.M{
 			"$match": bson.M{
-				"_id": appointmentId,
+				matchField: matchValue,
 			},
-		},
+		})
 	}
 
-	cursor, err := coll.Aggregate(ctx, pipeline)
-
-	if err != nil {
-		return nil, err
-	}
-
-	var result []*dbdtos.GetAppointmentDbResponse
-	if err := cursor.All(context.Background(), &result); err != nil {
-		return nil, err
-	}
-
-	if len(result) != 1 {
-		return nil, errors.New("appointment cannot found")
-	}
-
-	appointmentData := result[0]
-	var symptomsData []dbdtos.GetSymptomDbResponse
-
-	if symptomsData, err = service.symptomsService.GetSymptomsByIds(appointmentData.SymptomIds); err != nil {
-		return nil, err
-	}
-
-	doctorData := appointmentData.Doctors[0]
-	doctorDto := dtos.DoctorDto{
-		ID:         doctorData.ID,
-		UserId:     doctorData.UserId,
-		DoctorInfo: doctorData.DoctorInfo,
-	}
-
-	patientData := appointmentData.Patients[0]
-	patientDto := dtos.PatientDto{
-		ID:          patientData.ID,
-		DoctorId:    patientData.DoctorId,
-		UserId:      patientData.UserId,
-		PatientInfo: patientData.PatientInfo,
-	}
-
-	var symptomsDtos []*dtos.SymptomDto
-
-	for _, symptom := range symptomsData {
-		symptomDto := dtos.SymptomDto{
-			ID:       symptom.ID,
-			BodyPart: &symptom.BodyParts[0],
-			Name:     symptom.Name,
-			Level:    symptom.Level,
-		}
-		symptomsDtos = append(symptomsDtos, &symptomDto)
-	}
-
-	appointmentDto := dtos.AppointmentDto{
-		ID:          appointmentData.ID,
-		ReportId:    appointmentData.ReportId,
-		Doctor:      &doctorDto,
-		Patient:     &patientDto,
-		PatientNote: appointmentData.PatientNote,
-		Symptoms:    symptomsDtos,
-		Date:        appointmentData.Date,
-	}
-
-	return &appointmentDto, err
+	return coll.Aggregate(ctx, pipeline)
 }

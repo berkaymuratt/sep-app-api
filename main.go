@@ -32,6 +32,7 @@ func main() {
 	symptomsService := services.NewSymptomService()
 	bodyPartsService := services.NewBodyPartsService()
 	appointmentsService := services.NewAppointmentsService(symptomsService)
+	diseasesService := services.NewDiseasesService(symptomsService)
 
 	doctorsController := controllers.NewDoctorsController(doctorsService)
 	patientsController := controllers.NewPatientsController(patientsService)
@@ -39,6 +40,7 @@ func main() {
 	appointmentsController := controllers.NewAppointmentsController(appointmentsService)
 	symptomsController := controllers.NewSymptomsController(symptomsService)
 	bodyPartsController := controllers.NewBodyPartsController(bodyPartsService)
+	diseasesController := controllers.NewDiseasesController(diseasesService)
 
 	allRoutes := routes.NewRoutes(
 		app,
@@ -48,6 +50,7 @@ func main() {
 		appointmentsController,
 		symptomsController,
 		bodyPartsController,
+		diseasesController,
 	)
 	allRoutes.DefineRoutes()
 

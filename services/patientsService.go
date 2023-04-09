@@ -23,50 +23,27 @@ func (service PatientsService) GetPatients() ([]*dtos.PatientDto, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	coll := configs.GetCollection("patients")
-
-	pipeline := bson.A{
-		bson.M{
-			"$lookup": bson.M{
-				"from":         "doctors",
-				"localField":   "_doctor_id",
-				"foreignField": "_id",
-				"as":           "doctors",
-			},
-		},
-	}
-
-	cursor, err := coll.Aggregate(ctx, pipeline)
+	cursor, err := service.getPatientsCursor(ctx, "", "")
 
 	if err != nil {
 		return nil, err
 	}
 
-	var result []dbdtos.GetPatientDbResponse
+	var result []*dbdtos.GetPatientDbResponse
 	if err := cursor.All(context.Background(), &result); err != nil {
 		return nil, err
 	}
 
 	var patients []*dtos.PatientDto
 
-	for _, data := range result {
+	for _, patientData := range result {
+		patientDto, err := dtos.PatientDtoFromPatientDbResponse(patientData)
 
-		doctor := data.Doctors[0]
-		doctorDto := dtos.DoctorDto{
-			ID:         doctor.ID,
-			UserId:     doctor.UserId,
-			DoctorInfo: doctor.DoctorInfo,
+		if err != nil {
+			return nil, err
 		}
 
-		patientDTO := dtos.PatientDto{
-			ID:          data.ID,
-			DoctorId:    data.DoctorId,
-			UserId:      data.UserId,
-			PatientInfo: data.PatientInfo,
-			Doctor:      &doctorDto,
-		}
-
-		patients = append(patients, &patientDTO)
+		patients = append(patients, patientDto)
 	}
 
 	return patients, err
@@ -76,54 +53,27 @@ func (service PatientsService) GetPatientsByDoctorId(doctorId primitive.ObjectID
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	coll := configs.GetCollection("patients")
-
-	pipeline := bson.A{
-		bson.M{
-			"$lookup": bson.M{
-				"from":         "doctors",
-				"localField":   "_doctor_id",
-				"foreignField": "_id",
-				"as":           "doctors",
-			},
-		},
-		bson.M{
-			"$match": bson.M{
-				"_doctor_id": doctorId,
-			},
-		},
-	}
-
-	cursor, err := coll.Aggregate(ctx, pipeline)
+	cursor, err := service.getPatientsCursor(ctx, "_doctor_id", doctorId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	var result []dbdtos.GetPatientDbResponse
+	var result []*dbdtos.GetPatientDbResponse
 	if err := cursor.All(context.Background(), &result); err != nil {
 		return nil, err
 	}
 
 	var patients []*dtos.PatientDto
 
-	for _, data := range result {
-		doctor := data.Doctors[0]
-		doctorDto := dtos.DoctorDto{
-			ID:         doctor.ID,
-			UserId:     doctor.UserId,
-			DoctorInfo: doctor.DoctorInfo,
+	for _, patientData := range result {
+		patientDto, err := dtos.PatientDtoFromPatientDbResponse(patientData)
+
+		if err != nil {
+			return nil, err
 		}
 
-		patientDTO := dtos.PatientDto{
-			ID:          data.ID,
-			DoctorId:    data.DoctorId,
-			UserId:      data.UserId,
-			PatientInfo: data.PatientInfo,
-			Doctor:      &doctorDto,
-		}
-
-		patients = append(patients, &patientDTO)
+		patients = append(patients, patientDto)
 	}
 
 	return patients, err
@@ -133,24 +83,7 @@ func (service PatientsService) GetPatientById(patientId primitive.ObjectID) (*dt
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	coll := configs.GetCollection("patients")
-	pipeline := bson.A{
-		bson.M{
-			"$lookup": bson.M{
-				"from":         "doctors",
-				"localField":   "_doctor_id",
-				"foreignField": "_id",
-				"as":           "doctors",
-			},
-		},
-		bson.M{
-			"$match": bson.M{
-				"_id": patientId,
-			},
-		},
-	}
-
-	cursor, err := coll.Aggregate(ctx, pipeline)
+	cursor, err := service.getPatientsCursor(ctx, "_id", patientId)
 
 	if err != nil {
 		return nil, err
@@ -165,23 +98,8 @@ func (service PatientsService) GetPatientById(patientId primitive.ObjectID) (*dt
 		return nil, errors.New("doctor_models cannot found")
 	}
 
-	data := result[0]
-	doctor := data.Doctors[0]
-	doctorDto := dtos.DoctorDto{
-		ID:         doctor.ID,
-		UserId:     doctor.UserId,
-		DoctorInfo: doctor.DoctorInfo,
-	}
-
-	patientDTO := dtos.PatientDto{
-		ID:          data.ID,
-		DoctorId:    data.DoctorId,
-		UserId:      data.UserId,
-		PatientInfo: data.PatientInfo,
-		Doctor:      &doctorDto,
-	}
-
-	return &patientDTO, err
+	patientData := result[0]
+	return dtos.PatientDtoFromPatientDbResponse(patientData)
 }
 
 func (service PatientsService) AddPatient(patient models.Patient) error {
@@ -225,4 +143,28 @@ func (service PatientsService) IsUserIdExist(userId string) bool {
 	}
 
 	return len(result) > 0
+}
+
+func (service PatientsService) getPatientsCursor(ctx context.Context, matchField string, matchValue any) (*mongo.Cursor, error) {
+	coll := configs.GetCollection("patients")
+	pipeline := bson.A{
+		bson.M{
+			"$lookup": bson.M{
+				"from":         "doctors",
+				"localField":   "_doctor_id",
+				"foreignField": "_id",
+				"as":           "doctors",
+			},
+		},
+	}
+
+	if matchField != "" {
+		pipeline = append(pipeline, bson.M{
+			"$match": bson.M{
+				matchField: matchValue,
+			},
+		})
+	}
+
+	return coll.Aggregate(ctx, pipeline)
 }

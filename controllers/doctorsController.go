@@ -36,7 +36,7 @@ func (controller DoctorsController) GetDoctorById(ctx *fiber.Ctx) error {
 	doctorId, err := primitive.ObjectIDFromHex(idStr)
 
 	if err != nil {
-		return handleError(ctx, "patient_id is invalid")
+		return handleError(ctx, "invalid doctor_id")
 	}
 
 	doctorsService := controller.doctorsService
@@ -54,7 +54,7 @@ func (controller DoctorsController) AddDoctor(ctx *fiber.Ctx) error {
 
 	var request dtos.DoctorDto
 	if err := ctx.BodyParser(&request); err != nil {
-		return handleError(ctx, "Invalid Patient Data")
+		return handleError(ctx, "Invalid Doctor Data")
 	}
 
 	if doctorsService.IsUserIdExist(request.UserId) {

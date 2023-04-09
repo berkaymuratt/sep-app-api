@@ -13,6 +13,7 @@ type Routes struct {
 	appointmentsController controllers.AppointmentsController
 	symptomsController     controllers.SymptomsController
 	bodyPartsController    controllers.BodyPartsController
+	diseasesController     controllers.DiseaseController
 }
 
 func NewRoutes(
@@ -23,6 +24,7 @@ func NewRoutes(
 	appointmentsController controllers.AppointmentsController,
 	symptomsController controllers.SymptomsController,
 	bodyPartsController controllers.BodyPartsController,
+	diseasesController controllers.DiseaseController,
 ) Routes {
 	return Routes{
 		app:                    app,
@@ -32,6 +34,7 @@ func NewRoutes(
 		appointmentsController: appointmentsController,
 		symptomsController:     symptomsController,
 		bodyPartsController:    bodyPartsController,
+		diseasesController:     diseasesController,
 	}
 }
 
@@ -42,4 +45,5 @@ func (routes Routes) DefineRoutes() {
 	routes.defineAppointmentsRoutes()
 	routes.defineSymptomsRoutes()
 	routes.defineBodyPartsRoutes()
+	routes.defineDiseasesRoutes()
 }

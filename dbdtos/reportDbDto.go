@@ -16,8 +16,6 @@ type GetReportDbResponse struct {
 	PatientNote        string               `bson:"patient_note"`
 	CreatedAt          time.Time            `bson:"created_at"`
 
-	Doctors          []models.Doctor  `bson:"doctors"`
-	Patients         []models.Patient `bson:"patients"`
-	Symptoms         []models.Symptom `bson:"symptoms"`
-	PossibleDiseases []models.Disease `bson:"possible_diseases"`
+	Doctors  []models.Doctor  `bson:"doctors"`
+	Patients []models.Patient `bson:"patients"`
 }
