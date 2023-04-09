@@ -5,10 +5,10 @@ import (
 )
 
 type Doctor struct {
-	ID           primitive.ObjectID `bson:"_id,omitempty"`
-	UserId       string             `bson:"user_id"`
-	UserPassword string             `bson:"user_password"`
-	DoctorInfo   DoctorInfo         `bson:"doctor_info"`
+	ID           primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	UserId       string             `bson:"user_id" json:"user_id"`
+	UserPassword string             `bson:"user_password" json:"user_password"`
+	DoctorInfo   DoctorInfo         `bson:"doctor_info" json:"doctor_info"`
 }
 
 type DoctorInfo struct {

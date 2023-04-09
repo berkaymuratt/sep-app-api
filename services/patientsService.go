@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"github.com/berkaymuratt/sep-app-api/configs"
-	"github.com/berkaymuratt/sep-app-api/dbdtos"
 	"github.com/berkaymuratt/sep-app-api/dtos"
 	"github.com/berkaymuratt/sep-app-api/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -29,24 +28,25 @@ func (service PatientsService) GetPatients() ([]*dtos.PatientDto, error) {
 		return nil, err
 	}
 
-	var result []*dbdtos.GetPatientDbResponse
-	if err := cursor.All(context.Background(), &result); err != nil {
+	var patients []*models.Patient
+	if err := cursor.All(context.Background(), &patients); err != nil {
 		return nil, err
 	}
 
-	var patients []*dtos.PatientDto
+	var patientsDtos []*dtos.PatientDto
 
-	for _, patientData := range result {
-		patientDto, err := dtos.PatientDtoFromPatientDbResponse(patientData)
-
-		if err != nil {
-			return nil, err
+	for _, patient := range patients {
+		patientDto := dtos.PatientDto{
+			ID:          patient.ID,
+			DoctorId:    patient.DoctorId,
+			UserId:      patient.UserId,
+			PatientInfo: patient.PatientInfo,
 		}
 
-		patients = append(patients, patientDto)
+		patientsDtos = append(patientsDtos, &patientDto)
 	}
 
-	return patients, err
+	return patientsDtos, err
 }
 
 func (service PatientsService) GetPatientsByDoctorId(doctorId primitive.ObjectID) ([]*dtos.PatientDto, error) {
@@ -59,24 +59,25 @@ func (service PatientsService) GetPatientsByDoctorId(doctorId primitive.ObjectID
 		return nil, err
 	}
 
-	var result []*dbdtos.GetPatientDbResponse
-	if err := cursor.All(context.Background(), &result); err != nil {
+	var patients []*models.Patient
+	if err := cursor.All(context.Background(), &patients); err != nil {
 		return nil, err
 	}
 
-	var patients []*dtos.PatientDto
+	var patientsDtos []*dtos.PatientDto
 
-	for _, patientData := range result {
-		patientDto, err := dtos.PatientDtoFromPatientDbResponse(patientData)
-
-		if err != nil {
-			return nil, err
+	for _, patient := range patients {
+		patientDto := dtos.PatientDto{
+			ID:          patient.ID,
+			DoctorId:    patient.DoctorId,
+			UserId:      patient.UserId,
+			PatientInfo: patient.PatientInfo,
 		}
 
-		patients = append(patients, patientDto)
+		patientsDtos = append(patientsDtos, &patientDto)
 	}
 
-	return patients, err
+	return patientsDtos, err
 }
 
 func (service PatientsService) GetPatientById(patientId primitive.ObjectID) (*dtos.PatientDto, error) {
@@ -89,17 +90,23 @@ func (service PatientsService) GetPatientById(patientId primitive.ObjectID) (*dt
 		return nil, err
 	}
 
-	var result []*dbdtos.GetPatientDbResponse
-	if err := cursor.All(context.Background(), &result); err != nil {
+	var patients []*models.Patient
+	if err := cursor.All(context.Background(), &patients); err != nil {
 		return nil, err
 	}
 
-	if len(result) != 1 && len(result[0].Doctors) != 1 {
+	if len(patients) != 1 {
 		return nil, errors.New("doctor_models cannot found")
 	}
 
-	patientData := result[0]
-	return dtos.PatientDtoFromPatientDbResponse(patientData)
+	patient := patients[0]
+	patientDto := dtos.PatientDto{
+		ID:          patient.ID,
+		DoctorId:    patient.DoctorId,
+		UserId:      patient.UserId,
+		PatientInfo: patient.PatientInfo,
+	}
+	return &patientDto, nil
 }
 
 func (service PatientsService) AddPatient(patient models.Patient) error {
@@ -137,7 +144,7 @@ func (service PatientsService) IsUserIdExist(userId string) bool {
 		return true
 	}
 
-	var result []dbdtos.GetPatientDbResponse
+	var result []models.Patient
 	if err := cursor.All(context.Background(), &result); err != nil {
 		return true
 	}
@@ -147,16 +154,7 @@ func (service PatientsService) IsUserIdExist(userId string) bool {
 
 func (service PatientsService) getPatientsCursor(ctx context.Context, matchField string, matchValue any) (*mongo.Cursor, error) {
 	coll := configs.GetCollection("patients")
-	pipeline := bson.A{
-		bson.M{
-			"$lookup": bson.M{
-				"from":         "doctors",
-				"localField":   "_doctor_id",
-				"foreignField": "_id",
-				"as":           "doctors",
-			},
-		},
-	}
+	pipeline := bson.A{}
 
 	if matchField != "" {
 		pipeline = append(pipeline, bson.M{

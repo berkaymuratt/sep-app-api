@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"github.com/berkaymuratt/sep-app-api/configs"
-	"github.com/berkaymuratt/sep-app-api/dbdtos"
 	"github.com/berkaymuratt/sep-app-api/dtos"
 	"github.com/berkaymuratt/sep-app-api/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -29,24 +28,24 @@ func (service DoctorsService) GetDoctors() ([]*dtos.DoctorDto, error) {
 		return nil, err
 	}
 
-	var doctorsData []*dbdtos.GetDoctorDbResponse
-	if err := cursor.All(context.Background(), &doctorsData); err != nil {
+	var doctors []*models.Doctor
+	if err := cursor.All(context.Background(), &doctors); err != nil {
 		return nil, err
 	}
 
-	var doctors []*dtos.DoctorDto
+	var doctorsDtos []*dtos.DoctorDto
 
-	for _, doctorData := range doctorsData {
-		doctorDto, err := dtos.DoctorDtoFromDoctorDbResponse(doctorData)
-
-		if err != nil {
-			return nil, err
+	for _, doctor := range doctors {
+		doctorDto := dtos.DoctorDto{
+			ID:         doctor.ID,
+			UserId:     doctor.UserId,
+			DoctorInfo: doctor.DoctorInfo,
 		}
 
-		doctors = append(doctors, doctorDto)
+		doctorsDtos = append(doctorsDtos, &doctorDto)
 	}
 
-	return doctors, err
+	return doctorsDtos, err
 }
 
 func (service DoctorsService) GetDoctorById(doctorId primitive.ObjectID) (*dtos.DoctorDto, error) {
@@ -59,7 +58,7 @@ func (service DoctorsService) GetDoctorById(doctorId primitive.ObjectID) (*dtos.
 		return nil, err
 	}
 
-	var result []*dbdtos.GetDoctorDbResponse
+	var result []*models.Doctor
 	if err := cursor.All(context.Background(), &result); err != nil {
 		return nil, err
 	}
@@ -68,8 +67,15 @@ func (service DoctorsService) GetDoctorById(doctorId primitive.ObjectID) (*dtos.
 		return nil, errors.New("doctor_models cannot found")
 	}
 
-	doctorData := result[0]
-	return dtos.DoctorDtoFromDoctorDbResponse(doctorData)
+	doctor := result[0]
+
+	doctorDto := dtos.DoctorDto{
+		ID:         doctor.ID,
+		UserId:     doctor.UserId,
+		DoctorInfo: doctor.DoctorInfo,
+	}
+
+	return &doctorDto, nil
 }
 
 func (service DoctorsService) AddDoctor(doctor models.Doctor) error {
@@ -107,7 +113,7 @@ func (service DoctorsService) IsUserIdExist(userId string) bool {
 		return true
 	}
 
-	var result []dbdtos.GetDoctorDbResponse
+	var result []*models.Doctor
 	if err := cursor.All(context.Background(), &result); err != nil {
 		return true
 	}
@@ -118,16 +124,7 @@ func (service DoctorsService) IsUserIdExist(userId string) bool {
 func (service DoctorsService) getDoctorsCursor(ctx context.Context, matchField string, matchValue any) (*mongo.Cursor, error) {
 	coll := configs.GetCollection("doctors")
 
-	pipeline := bson.A{
-		bson.M{
-			"$lookup": bson.M{
-				"from":         "patients",
-				"localField":   "_id",
-				"foreignField": "_doctor_id",
-				"as":           "patients",
-			},
-		},
-	}
+	pipeline := bson.A{}
 
 	if matchField != "" {
 		pipeline = append(pipeline, bson.M{
