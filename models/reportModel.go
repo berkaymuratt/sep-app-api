@@ -6,7 +6,7 @@ import (
 )
 
 type Report struct {
-	ID                 primitive.ObjectID   `bson:"_id"`
+	ID                 primitive.ObjectID   `bson:"_id,omitempty"`
 	DoctorId           primitive.ObjectID   `bson:"_doctor_id"`
 	PatientId          primitive.ObjectID   `bson:"_patient_id"`
 	SymptomIds         []primitive.ObjectID `bson:"_symptom_ids"`

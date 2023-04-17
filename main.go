@@ -26,6 +26,10 @@ func main() {
 
 	app.Use(corsMiddleware)
 
+	authService := services.NewAuthService()
+	jwtService := services.NewJwtService()
+	middlewareService := services.NewMiddlewareService(jwtService)
+
 	doctorsService := services.NewDoctorsService()
 	patientsService := services.NewPatientsService()
 	reportsService := services.NewReportsService()
@@ -34,6 +38,7 @@ func main() {
 	appointmentsService := services.NewAppointmentsService(symptomsService)
 	diseasesService := services.NewDiseasesService(symptomsService)
 
+	authController := controllers.NewAuthService(authService, jwtService)
 	doctorsController := controllers.NewDoctorsController(doctorsService)
 	patientsController := controllers.NewPatientsController(patientsService)
 	reportsController := controllers.NewReportsController(reportsService)
@@ -44,6 +49,8 @@ func main() {
 
 	allRoutes := routes.NewRoutes(
 		app,
+		middlewareService,
+		authController,
 		doctorsController,
 		patientsController,
 		reportsController,

@@ -5,5 +5,7 @@ func (routes Routes) defineReportsRoutes() {
 	controller := routes.reportsController
 
 	reportsRoutes := app.Group("/api/reports")
-	reportsRoutes.Get("/:id", controller.GetReport)
+	reportsRoutes.Use(routes.middlewareService.Middleware)
+	reportsRoutes.Get("/", controller.GetReports)
+	reportsRoutes.Get("/:id", controller.GetReportById)
 }

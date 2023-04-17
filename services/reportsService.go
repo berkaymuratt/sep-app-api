@@ -66,7 +66,56 @@ func (service ReportsService) GetReportById(reportId primitive.ObjectID) (*dtos.
 	return dtos.ReportDtoFromReportDbResponse(reportData, symptomsDtos, diseasesDtos)
 }
 
-func (service ReportsService) CreateReport(appointment *models.Appointment) error {
+func (service ReportsService) GetReports(doctorId *primitive.ObjectID, patientId *primitive.ObjectID) ([]*dtos.ReportDto, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var cursor *mongo.Cursor
+	var err error
+
+	if doctorId != nil {
+		cursor, err = service.getReportsCursor(ctx, "_doctor_id", doctorId)
+	} else if patientId != nil {
+		cursor, err = service.getReportsCursor(ctx, "_patient_id", patientId)
+	} else {
+		return nil, errors.New("missing ids")
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*dbdtos.GetReportDbResponse
+	if err := cursor.All(context.Background(), &result); err != nil {
+		return nil, err
+	}
+
+	var reportsDtos []*dtos.ReportDto
+
+	for _, reportData := range result {
+		var symptomsDto []*dtos.SymptomDto
+		if symptomsDto, err = service.symptomsService.GetSymptomsByIds(reportData.SymptomIds); err != nil {
+			return nil, err
+		}
+
+		var diseasesDto []*dtos.DiseaseDto
+		if diseasesDto, err = service.diseasesService.GetDiseasesByIds(reportData.PossibleDiseaseIds); err != nil {
+			return nil, err
+		}
+
+		reportDto, err := dtos.ReportDtoFromReportDbResponse(reportData, symptomsDto, diseasesDto)
+
+		if err != nil {
+			return nil, err
+		}
+
+		reportsDtos = append(reportsDtos, reportDto)
+	}
+
+	return reportsDtos, err
+}
+
+func (service ReportsService) CreateReportByAppointment(appointment *models.Appointment) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -115,6 +164,16 @@ func (service ReportsService) CreateReport(appointment *models.Appointment) erro
 	}
 
 	appointment.ReportId = res.InsertedID.(primitive.ObjectID)
+	return err
+}
+
+func (service ReportsService) DeleteReport(reportId primitive.ObjectID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	coll := configs.GetCollection("reports")
+	_, err := coll.DeleteOne(ctx, bson.M{"_id": reportId})
+
 	return err
 }
 

@@ -52,11 +52,20 @@ func (service AppointmentsService) GetAppointmentById(appointmentId primitive.Ob
 	return dtos.AppointmentDtoFromAppointmentResponse(appointmentData, symptomsDto)
 }
 
-func (service AppointmentsService) GetAppointmentByDoctor(doctorId primitive.ObjectID) ([]*dtos.AppointmentDto, error) {
+func (service AppointmentsService) GetAppointments(doctorId *primitive.ObjectID, patientId *primitive.ObjectID) ([]*dtos.AppointmentDto, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cursor, err := service.getAppointmentsCursor(ctx, "_doctor_id", doctorId)
+	var cursor *mongo.Cursor
+	var err error
+
+	if doctorId != nil {
+		cursor, err = service.getAppointmentsCursor(ctx, "_doctor_id", doctorId)
+	} else if patientId != nil {
+		cursor, err = service.getAppointmentsCursor(ctx, "_patient_id", patientId)
+	} else {
+		return nil, errors.New("missing ids")
+	}
 
 	if err != nil {
 		return nil, err
@@ -92,6 +101,28 @@ func (service AppointmentsService) AddAppointment(newAppointment models.Appointm
 	defer cancel()
 
 	_, err := configs.GetCollection("appointments").InsertOne(ctx, newAppointment)
+	return err
+}
+
+func (service AppointmentsService) UpdateAppointmentDate(appointmentId primitive.ObjectID, newDate time.Time) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	update := bson.M{
+		"$set": bson.M{
+			"date": newDate,
+		},
+	}
+
+	_, err := configs.GetCollection("appointments").UpdateByID(ctx, appointmentId, update)
+	return err
+}
+
+func (service AppointmentsService) DeleteAppointment(appointmentId primitive.ObjectID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	_, err := configs.GetCollection("appointments").DeleteOne(ctx, bson.M{"_id": appointmentId})
 	return err
 }
 

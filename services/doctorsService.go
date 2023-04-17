@@ -100,6 +100,24 @@ func (service DoctorsService) AddDoctor(doctor models.Doctor) error {
 	return nil
 }
 
+func (service DoctorsService) GetDoctorByUserId(userId string) (*dtos.DoctorDto, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	cursor, err := service.getDoctorsCursor(ctx, "user_id", userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var doctor *dtos.DoctorDto
+	if err := cursor.Decode(&doctor); err != nil {
+		return nil, err
+	}
+
+	return doctor, nil
+}
+
 func (service DoctorsService) UpdateDoctor(doctorId primitive.ObjectID, newDoctorDto dtos.DoctorDto) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

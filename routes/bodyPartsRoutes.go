@@ -5,5 +5,6 @@ func (routes Routes) defineBodyPartsRoutes() {
 	controller := routes.bodyPartsController
 
 	bodyPartsRoutes := app.Group("/api/body-parts")
+	bodyPartsRoutes.Use(routes.middlewareService.Middleware)
 	bodyPartsRoutes.Get("/", controller.GetBodyParts)
 }

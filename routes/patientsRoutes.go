@@ -5,6 +5,7 @@ func (routes Routes) definePatientsRoutes() {
 	controller := routes.patientsController
 
 	patientsRoutes := app.Group("/api/patients")
+	patientsRoutes.Use(routes.middlewareService.Middleware)
 	patientsRoutes.Get("/", controller.GetPatients)
 	patientsRoutes.Get("/:id", controller.GetPatientById)
 	patientsRoutes.Patch("/:id", controller.UpdatePatient)

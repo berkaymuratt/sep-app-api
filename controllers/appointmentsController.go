@@ -38,14 +38,32 @@ func (controller AppointmentsController) GetAppointmentById(ctx *fiber.Ctx) erro
 }
 
 func (controller AppointmentsController) GetAppointments(ctx *fiber.Ctx) error {
-	idStr := ctx.Query("doctor_id")
-	doctorId, err := primitive.ObjectIDFromHex(idStr)
+	doctorIdStr := ctx.Query("doctor_id")
+	patientIdStr := ctx.Query("patient_id")
 
-	if err != nil {
-		return handleError(ctx, "invalid doctor_id")
+	var appointments []*dtos.AppointmentDto
+	var err error
+
+	if doctorIdStr != "" {
+		doctorId, err := primitive.ObjectIDFromHex(doctorIdStr)
+
+		if err != nil {
+			return handleError(ctx, "invalid doctor_id")
+		}
+
+		appointments, err = controller.appointmentsService.GetAppointments(&doctorId, nil)
+
+	} else if patientIdStr != "" {
+		patientId, err := primitive.ObjectIDFromHex(patientIdStr)
+
+		if err != nil {
+			return handleError(ctx, "invalid patient_id")
+		}
+
+		appointments, err = controller.appointmentsService.GetAppointments(nil, &patientId)
+	} else {
+		return handleError(ctx, "missing id")
 	}
-
-	appointments, err := controller.appointmentsService.GetAppointmentByDoctor(doctorId)
 
 	if err != nil {
 		return handleError(ctx, err.Error())
@@ -65,12 +83,13 @@ func (controller AppointmentsController) AddAppointment(ctx *fiber.Ctx) error {
 		return handleError(ctx, "invalid appointment data")
 	}
 
-	if !appointmentsService.IsDateAvailable(request.Doctor.ID, request.Patient.ID, request.Date) {
+	isAvailable := appointmentsService.IsDateAvailable(request.Doctor.ID, request.Patient.ID, request.Date)
+
+	if !isAvailable {
 		return handleError(ctx, "date is not available")
 	}
 
 	var symptomIds []primitive.ObjectID
-
 	for _, symptomDto := range request.Symptoms {
 		symptomIds = append(symptomIds, symptomDto.ID)
 	}
@@ -84,7 +103,7 @@ func (controller AppointmentsController) AddAppointment(ctx *fiber.Ctx) error {
 		Date:        request.Date,
 	}
 
-	if err := reportsService.CreateReport(&appointment); err != nil {
+	if err := reportsService.CreateReportByAppointment(&appointment); err != nil {
 		return handleError(ctx, err.Error())
 	}
 
@@ -93,6 +112,74 @@ func (controller AppointmentsController) AddAppointment(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"message": "successful",
+	})
+}
+
+func (controller AppointmentsController) UpdateAppointmentDate(ctx *fiber.Ctx) error {
+	appointmentsService := controller.appointmentsService
+
+	idStr := ctx.Params("id")
+	appointmentId, err := primitive.ObjectIDFromHex(idStr)
+
+	if err != nil {
+		return handleError(ctx, "invalid appointment_id")
+	}
+
+	var request dtos.AppointmentDto
+	if err := ctx.BodyParser(&request); err != nil {
+		return handleError(ctx, "invalid appointment data")
+	}
+
+	var symptomIds []primitive.ObjectID
+	for _, symptomDto := range request.Symptoms {
+		symptomIds = append(symptomIds, symptomDto.ID)
+	}
+
+	updatedAppointment := models.Appointment{
+		ID:          request.ID,
+		DoctorId:    request.Doctor.ID,
+		PatientId:   request.Patient.ID,
+		SymptomIds:  symptomIds,
+		PatientNote: request.PatientNote,
+		Date:        request.Date,
+	}
+
+	isAvailable := appointmentsService.IsDateAvailable(updatedAppointment.DoctorId, updatedAppointment.PatientId, updatedAppointment.Date)
+
+	if !isAvailable {
+		return handleError(ctx, "invalid date")
+	}
+
+	err = controller.appointmentsService.UpdateAppointmentDate(appointmentId, updatedAppointment.Date)
+
+	if err != nil {
+		return handleError(ctx, err.Error())
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "successful",
+	})
+}
+
+func (controller AppointmentsController) DeleteAppointmentById(ctx *fiber.Ctx) error {
+
+	var err error
+
+	idStr := ctx.Params("id")
+	appointmentId, err := primitive.ObjectIDFromHex(idStr)
+
+	if err != nil {
+		return handleError(ctx, "invalid appointment_id")
+	}
+
+	err = controller.appointmentsService.DeleteAppointment(appointmentId)
+
+	if err != nil {
+		return handleError(ctx, err.Error())
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "successful",
 	})
 }
