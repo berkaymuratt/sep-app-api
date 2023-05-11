@@ -15,6 +15,7 @@ type Patient struct {
 type PatientInfo struct {
 	Name      string  `bson:"name" json:"name"`
 	Surname   string  `bson:"surname" json:"surname"`
+	Gender    string  `bson:"gender" json:"gender"`
 	Age       int     `bson:"age" json:"age"`
 	Height    int     `bson:"height" json:"height"`
 	Weight    float64 `bson:"weight" json:"weight"`

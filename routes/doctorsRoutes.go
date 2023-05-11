@@ -10,4 +10,5 @@ func (routes Routes) defineDoctorsRoutes() {
 	doctorsRoutes.Get("/:id", controller.GetDoctorById)
 	doctorsRoutes.Patch("/:id", controller.UpdateDoctor)
 	doctorsRoutes.Post("/", controller.AddDoctor)
+	doctorsRoutes.Get("/:id/busy-times", controller.GetBusyTimes)
 }

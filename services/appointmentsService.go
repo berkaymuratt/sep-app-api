@@ -143,8 +143,8 @@ func (service AppointmentsService) IsDateAvailable(doctorId primitive.ObjectID, 
 							},
 							bson.M{
 								"date": bson.M{
-									"$gte": date.Add(-1 * time.Hour),
-									"$lte": date.Add(1 * time.Hour),
+									"$gt": date.Add(-30 * time.Minute),
+									"$lt": date.Add(30 * time.Minute),
 								},
 							},
 						},
@@ -156,8 +156,8 @@ func (service AppointmentsService) IsDateAvailable(doctorId primitive.ObjectID, 
 							},
 							bson.M{
 								"date": bson.M{
-									"$gte": date.Add(-1 * time.Hour),
-									"$lte": date.Add(1 * time.Hour),
+									"$gt": date.Add(-30 * time.Minute),
+									"$lt": date.Add(30 * time.Minute),
 								},
 							},
 						},

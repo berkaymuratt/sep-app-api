@@ -155,6 +155,43 @@ func (service DoctorsService) IsUserIdExist(userId string) bool {
 	return len(result) > 0
 }
 
+func (service DoctorsService) GetBusyTimes(doctorId primitive.ObjectID, date time.Time) ([]time.Time, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	year := date.Year()
+	month := date.Month()
+	day := date.Day()
+
+	filter := bson.M{
+		"_doctor_id": doctorId,
+		"date": bson.M{
+			"$gte": time.Date(year, month, day, 0, 0, 0, 0, time.UTC),
+			"$lt":  time.Date(year, month, day+1, 0, 0, 0, 0, time.UTC),
+		},
+	}
+
+	var err error
+	var cursor *mongo.Cursor
+
+	if cursor, err = configs.GetCollection("appointments").Find(ctx, filter); err != nil {
+		return nil, err
+	}
+
+	var result []*dtos.AppointmentDto
+	if err := cursor.All(context.Background(), &result); err != nil {
+		return nil, err
+	}
+
+	var appointmentTimes []time.Time
+
+	for _, result := range result {
+		appointmentTimes = append(appointmentTimes, result.Date)
+	}
+
+	return appointmentTimes, nil
+}
+
 func (service DoctorsService) getDoctorsCursor(ctx context.Context, matchField string, matchValue any) (*mongo.Cursor, error) {
 	coll := configs.GetCollection("doctors")
 

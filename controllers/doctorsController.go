@@ -6,6 +6,7 @@ import (
 	"github.com/berkaymuratt/sep-app-api/services"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"time"
 )
 
 type DoctorsController struct {
@@ -95,5 +96,31 @@ func (controller DoctorsController) UpdateDoctor(ctx *fiber.Ctx) error {
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "successful",
+	})
+}
+
+func (controller DoctorsController) GetBusyTimes(ctx *fiber.Ctx) error {
+	idStr := ctx.Params("id")
+	doctorId, err := primitive.ObjectIDFromHex(idStr)
+
+	if err != nil {
+		return handleError(ctx, "invalid doctor_id")
+	}
+
+	date := ctx.Query("date")
+	dateTime, err := time.Parse("2006-01-02T15:04:05.000Z", date)
+
+	if err != nil {
+		return handleError(ctx, "invalid date")
+	}
+
+	times, err := controller.doctorsService.GetBusyTimes(doctorId, dateTime)
+
+	if err != nil {
+		return handleError(ctx, err.Error())
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"busy_times": times,
 	})
 }
