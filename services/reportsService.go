@@ -147,11 +147,17 @@ func (service ReportsService) CreateReportByAppointment(appointment *models.Appo
 		possibleDiseaseIds = append(possibleDiseaseIds, disease.ID)
 	}
 
+	var diseaseIds []primitive.ObjectID
+
+	if possibleDiseaseIds != nil {
+		diseaseIds = possibleDiseaseIds
+	}
+
 	report := models.Report{
 		DoctorId:           appointment.DoctorId,
 		PatientId:          appointment.PatientId,
 		SymptomIds:         appointment.SymptomIds,
-		PossibleDiseaseIds: possibleDiseaseIds,
+		PossibleDiseaseIds: diseaseIds,
 		DoctorFeedback:     "",
 		PatientNote:        appointment.PatientNote,
 		CreatedAt:          time.Now(),

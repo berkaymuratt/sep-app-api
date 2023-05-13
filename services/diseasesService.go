@@ -62,6 +62,10 @@ func (service DiseasesService) GetDiseasesByIds(diseasesIds []primitive.ObjectID
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	if diseasesIds == nil {
+		return nil, nil
+	}
+
 	coll := configs.GetCollection("diseases")
 
 	pipeline := bson.A{
