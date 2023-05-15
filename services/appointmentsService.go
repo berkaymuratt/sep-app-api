@@ -209,6 +209,11 @@ func (service AppointmentsService) getAppointmentsCursor(ctx context.Context, ma
 				"as":           "reports",
 			},
 		},
+		bson.M{
+			"$sort": bson.M{
+				"date": 1,
+			},
+		},
 	}
 
 	if matchField != "" {
