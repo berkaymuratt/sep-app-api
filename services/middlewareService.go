@@ -5,7 +5,14 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
+//go:generate mockgen -destination=../mocks/service/mockMiddlewareService.go -package=services github.com/berkaymuratt/sep-app-api/services MiddlewareServiceI
+type MiddlewareServiceI interface {
+	Middleware(c *fiber.Ctx) error
+	CORSMiddleware() func(*fiber.Ctx) error
+}
+
 type MiddlewareService struct {
+	MiddlewareServiceI
 	jwtService JwtService
 }
 

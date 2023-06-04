@@ -13,7 +13,20 @@ import (
 	"time"
 )
 
-type SymptomsService struct{}
+//go:generate mockgen -destination=../mocks/service/mockSymptomsService.go -package=services github.com/berkaymuratt/sep-app-api/services SymptomsServiceI
+type SymptomsServiceI interface {
+	GetSymptoms() ([]*dtos.SymptomDto, error)
+	GetSymptomById(symptomId primitive.ObjectID) (*dtos.SymptomDto, error)
+	GetSymptomsByIds(symptomIds []primitive.ObjectID) ([]*dtos.SymptomDto, error)
+	GetSymptomsByBodyPart(bodyPartId primitive.ObjectID) ([]*dtos.SymptomDto, error)
+	AddSymptom(newSymptom models.Symptom) error
+	UpdateSymptom(symptomId primitive.ObjectID, updatedSymptom models.Symptom) error
+	DeleteSymptom(symptomId primitive.ObjectID) error
+}
+
+type SymptomsService struct {
+	SymptomsServiceI
+}
 
 func NewSymptomService() SymptomsService {
 	return SymptomsService{}

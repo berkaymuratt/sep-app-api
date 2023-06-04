@@ -12,7 +12,17 @@ import (
 	"time"
 )
 
-type AuthService struct{}
+//go:generate mockgen -destination=../mocks/service/mockAuthService.go -package=services github.com/berkaymuratt/sep-app-api/services AuthServiceI
+type AuthServiceI interface {
+	LoginAsDoctor(userId string, userPassword string) (*dtos.DoctorDto, error)
+	LoginAsPatient(userId string, userPassword string) (*dtos.PatientDto, error)
+	UpdatePatientPassword(patientId primitive.ObjectID, newPassword string) error
+	UpdateDoctorPassword(doctorId primitive.ObjectID, newPassword string) error
+}
+
+type AuthService struct {
+	AuthServiceI
+}
 
 func NewAuthService() AuthService {
 	return AuthService{}

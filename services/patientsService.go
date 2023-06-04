@@ -12,7 +12,20 @@ import (
 	"time"
 )
 
-type PatientsService struct{}
+//go:generate mockgen -destination=../mocks/service/mockPatientsService.go -package=services github.com/berkaymuratt/sep-app-api/services PatientsServiceI
+type PatientsServiceI interface {
+	GetPatients() ([]*dtos.PatientDto, error)
+	GetPatientsByDoctorId(doctorId primitive.ObjectID) ([]*dtos.PatientDto, error)
+	GetPatientById(patientId primitive.ObjectID) (*dtos.PatientDto, error)
+	GetPatientByUserId(userId string) (*dtos.PatientDto, error)
+	AddPatient(patient models.Patient) error
+	UpdatePatient(patientId primitive.ObjectID, newPatientDto dtos.PatientDto) error
+	IsUserIdExist(userId string) bool
+}
+
+type PatientsService struct {
+	PatientsServiceI
+}
 
 func NewPatientsService() PatientsService {
 	return PatientsService{}
