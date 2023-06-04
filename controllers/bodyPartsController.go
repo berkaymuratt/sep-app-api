@@ -6,7 +6,7 @@ import (
 )
 
 type BodyPartsController struct {
-	bodyPartsService services.BodyPartsService
+	bodyPartsService services.BodyPartsServiceI
 }
 
 func NewBodyPartsController(bodyPartsService services.BodyPartsService) BodyPartsController {

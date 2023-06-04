@@ -8,7 +8,7 @@ import (
 )
 
 type ReportsController struct {
-	reportsService services.ReportsService
+	reportsService services.ReportsServiceI
 }
 
 func NewReportsController(reportsService services.ReportsService) ReportsController {

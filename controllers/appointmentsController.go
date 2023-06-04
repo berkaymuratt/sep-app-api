@@ -9,8 +9,8 @@ import (
 )
 
 type AppointmentsController struct {
-	appointmentsService services.AppointmentsService
-	reportsService      services.ReportsService
+	appointmentsService services.AppointmentsServiceI
+	reportsService      services.ReportsServiceI
 }
 
 func NewAppointmentsController(appointmentsService services.AppointmentsService, reportsService services.ReportsService) AppointmentsController {

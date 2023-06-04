@@ -9,7 +9,7 @@ import (
 )
 
 type PatientsController struct {
-	patientsService services.PatientsService
+	patientsService services.PatientsServiceI
 }
 
 func NewPatientsController(patientsService services.PatientsService) PatientsController {
