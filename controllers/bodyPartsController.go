@@ -9,7 +9,7 @@ type BodyPartsController struct {
 	bodyPartsService services.BodyPartsServiceI
 }
 
-func NewBodyPartsController(bodyPartsService services.BodyPartsService) BodyPartsController {
+func NewBodyPartsController(bodyPartsService services.BodyPartsServiceI) BodyPartsController {
 	return BodyPartsController{
 		bodyPartsService: bodyPartsService,
 	}

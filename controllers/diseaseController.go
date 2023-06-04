@@ -12,7 +12,7 @@ type DiseaseController struct {
 	diseasesService services.DiseasesServiceI
 }
 
-func NewDiseasesController(diseasesService services.DiseasesService) DiseaseController {
+func NewDiseasesController(diseasesService services.DiseasesServiceI) DiseaseController {
 	return DiseaseController{
 		diseasesService: diseasesService,
 	}

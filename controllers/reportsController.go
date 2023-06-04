@@ -11,7 +11,7 @@ type ReportsController struct {
 	reportsService services.ReportsServiceI
 }
 
-func NewReportsController(reportsService services.ReportsService) ReportsController {
+func NewReportsController(reportsService services.ReportsServiceI) ReportsController {
 	return ReportsController{
 		reportsService: reportsService,
 	}
