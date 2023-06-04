@@ -110,12 +110,24 @@ func (service DoctorsService) GetDoctorByUserId(userId string) (*dtos.DoctorDto,
 		return nil, err
 	}
 
-	var doctor *dtos.DoctorDto
-	if err := cursor.Decode(&doctor); err != nil {
+	var result []*models.Doctor
+	if err := cursor.All(context.Background(), &result); err != nil {
 		return nil, err
 	}
 
-	return doctor, nil
+	if len(result) != 1 {
+		return nil, errors.New("doctor_models cannot found")
+	}
+
+	doctor := result[0]
+
+	doctorDto := dtos.DoctorDto{
+		ID:         doctor.ID,
+		UserId:     doctor.UserId,
+		DoctorInfo: doctor.DoctorInfo,
+	}
+
+	return &doctorDto, nil
 }
 
 func (service DoctorsService) UpdateDoctor(doctorId primitive.ObjectID, newDoctorDto dtos.DoctorDto) error {

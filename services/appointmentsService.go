@@ -210,6 +210,13 @@ func (service AppointmentsService) getAppointmentsCursor(ctx context.Context, ma
 			},
 		},
 		bson.M{
+			"$match": bson.M{
+				"date": bson.M{
+					"$gt": time.Now(),
+				},
+			},
+		},
+		bson.M{
 			"$sort": bson.M{
 				"date": 1,
 			},

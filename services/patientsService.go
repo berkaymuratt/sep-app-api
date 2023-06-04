@@ -109,6 +109,35 @@ func (service PatientsService) GetPatientById(patientId primitive.ObjectID) (*dt
 	return &patientDto, nil
 }
 
+func (service PatientsService) GetPatientByUserId(userId string) (*dtos.PatientDto, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	cursor, err := service.getPatientsCursor(ctx, "user_id", userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var patients []*models.Patient
+	if err := cursor.All(context.Background(), &patients); err != nil {
+		return nil, err
+	}
+
+	if len(patients) != 1 {
+		return nil, errors.New("doctor_models cannot found")
+	}
+
+	patient := patients[0]
+	patientDto := dtos.PatientDto{
+		ID:          patient.ID,
+		DoctorId:    patient.DoctorId,
+		UserId:      patient.UserId,
+		PatientInfo: patient.PatientInfo,
+	}
+	return &patientDto, nil
+}
+
 func (service PatientsService) AddPatient(patient models.Patient) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

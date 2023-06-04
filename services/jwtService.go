@@ -17,7 +17,7 @@ func NewJwtService() JwtService {
 
 func (service JwtService) GenerateJwtToken(userId string) (string, error) {
 
-	expiresAt := time.Now().Add(time.Hour * 1)
+	expiresAt := time.Now().Add(time.Hour * 24)
 
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 		Issuer:    userId,

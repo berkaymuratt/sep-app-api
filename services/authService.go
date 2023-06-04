@@ -7,6 +7,7 @@ import (
 	"github.com/berkaymuratt/sep-app-api/dtos"
 	"github.com/berkaymuratt/sep-app-api/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
@@ -70,4 +71,48 @@ func (service AuthService) LoginAsPatient(userId string, userPassword string) (*
 	}
 
 	return &patientDto, nil
+}
+
+func (service AuthService) UpdatePatientPassword(patientId primitive.ObjectID, newPassword string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	hashedPassword, err := hashPassword(newPassword)
+
+	if err != nil {
+		return err
+	}
+
+	coll := configs.GetCollection("patients")
+
+	update := bson.M{
+		"$set": bson.M{
+			"user_password": hashedPassword,
+		},
+	}
+
+	_, err = coll.UpdateByID(ctx, patientId, update)
+	return err
+}
+
+func (service AuthService) UpdateDoctorPassword(doctorId primitive.ObjectID, newPassword string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	hashedPassword, err := hashPassword(newPassword)
+
+	if err != nil {
+		return err
+	}
+
+	coll := configs.GetCollection("doctors")
+
+	update := bson.M{
+		"$set": bson.M{
+			"user_password": hashedPassword,
+		},
+	}
+
+	_, err = coll.UpdateByID(ctx, doctorId, update)
+	return err
 }
