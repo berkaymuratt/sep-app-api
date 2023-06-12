@@ -51,7 +51,7 @@ func (controller DiseaseController) AddDisease(ctx *fiber.Ctx) error {
 		return handleError(ctx, err.Error())
 	}
 
-	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "successful",
 	})
 }
