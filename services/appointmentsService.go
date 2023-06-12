@@ -122,8 +122,34 @@ func (service AppointmentsService) DeleteAppointment(appointmentId primitive.Obj
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	_, err := configs.GetCollection("appointments").DeleteOne(ctx, bson.M{"_id": appointmentId})
-	return err
+	pipeline := bson.A{
+		bson.M{"$project": bson.M{"_report_id": 1}},
+		bson.M{"$match": bson.M{"_id": appointmentId}},
+		bson.M{"$limit": 1},
+	}
+
+	cursor, err := configs.GetCollection("appointments").Aggregate(ctx, pipeline)
+
+	if err != nil {
+		return err
+	}
+
+	var results []dbdtos.GetAppointmentDbResponse
+	if err := cursor.All(context.Background(), &results); err != nil {
+		return err
+	}
+
+	reportId := results[0].ReportId
+
+	if _, err = configs.GetCollection("appointments").DeleteOne(ctx, bson.M{"_id": appointmentId}); err != nil {
+		return err
+	}
+
+	if _, err = configs.GetCollection("reports").DeleteOne(ctx, bson.M{"_id": reportId}); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (service AppointmentsService) IsDateAvailable(doctorId primitive.ObjectID, patientId primitive.ObjectID, date time.Time) bool {
