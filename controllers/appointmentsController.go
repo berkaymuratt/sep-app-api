@@ -9,11 +9,11 @@ import (
 )
 
 type AppointmentsController struct {
-	appointmentsService services.AppointmentsService
-	reportsService      services.ReportsService
+	appointmentsService services.AppointmentsServiceI
+	reportsService      services.ReportsServiceI
 }
 
-func NewAppointmentsController(appointmentsService services.AppointmentsService, reportsService services.ReportsService) AppointmentsController {
+func NewAppointmentsController(appointmentsService services.AppointmentsServiceI, reportsService services.ReportsServiceI) AppointmentsController {
 	return AppointmentsController{
 		appointmentsService: appointmentsService,
 		reportsService:      reportsService,

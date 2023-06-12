@@ -13,7 +13,18 @@ import (
 	"time"
 )
 
+//go:generate mockgen -destination=../mocks/service/mockAppointmentsService.go -package=services github.com/berkaymuratt/sep-app-api/services AppointmentsServiceI
+type AppointmentsServiceI interface {
+	GetAppointmentById(appointmentId primitive.ObjectID) (*dtos.AppointmentDto, error)
+	GetAppointments(doctorId *primitive.ObjectID, patientId *primitive.ObjectID) ([]*dtos.AppointmentDto, error)
+	AddAppointment(newAppointment models.Appointment) error
+	UpdateAppointmentDate(appointmentId primitive.ObjectID, newDate time.Time) error
+	DeleteAppointment(appointmentId primitive.ObjectID) error
+	IsDateAvailable(doctorId primitive.ObjectID, patientId primitive.ObjectID, date time.Time) bool
+}
+
 type AppointmentsService struct {
+	AppointmentsServiceI
 	symptomsService SymptomsService
 }
 

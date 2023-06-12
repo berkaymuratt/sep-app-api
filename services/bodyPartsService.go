@@ -8,7 +8,14 @@ import (
 	"time"
 )
 
-type BodyPartsService struct{}
+//go:generate mockgen -destination=../mocks/service/mockBodyPartsService.go -package=services github.com/berkaymuratt/sep-app-api/services BodyPartsServiceI
+type BodyPartsServiceI interface {
+	GetBodyParts() ([]*models.BodyPart, error)
+}
+
+type BodyPartsService struct {
+	BodyPartsServiceI
+}
 
 func NewBodyPartsService() BodyPartsService {
 	return BodyPartsService{}

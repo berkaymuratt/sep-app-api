@@ -9,10 +9,10 @@ import (
 )
 
 type DiseaseController struct {
-	diseasesService services.DiseasesService
+	diseasesService services.DiseasesServiceI
 }
 
-func NewDiseasesController(diseasesService services.DiseasesService) DiseaseController {
+func NewDiseasesController(diseasesService services.DiseasesServiceI) DiseaseController {
 	return DiseaseController{
 		diseasesService: diseasesService,
 	}
@@ -51,7 +51,7 @@ func (controller DiseaseController) AddDisease(ctx *fiber.Ctx) error {
 		return handleError(ctx, err.Error())
 	}
 
-	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "successful",
 	})
 }

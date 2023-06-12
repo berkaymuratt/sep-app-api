@@ -10,10 +10,10 @@ import (
 )
 
 type DoctorsController struct {
-	doctorsService services.DoctorsService
+	doctorsService services.DoctorsServiceI
 }
 
-func NewDoctorsController(doctorsService services.DoctorsService) DoctorsController {
+func NewDoctorsController(doctorsService services.DoctorsServiceI) DoctorsController {
 	return DoctorsController{
 		doctorsService: doctorsService,
 	}

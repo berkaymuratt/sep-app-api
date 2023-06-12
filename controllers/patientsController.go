@@ -9,10 +9,10 @@ import (
 )
 
 type PatientsController struct {
-	patientsService services.PatientsService
+	patientsService services.PatientsServiceI
 }
 
-func NewPatientsController(patientsService services.PatientsService) PatientsController {
+func NewPatientsController(patientsService services.PatientsServiceI) PatientsController {
 	return PatientsController{
 		patientsService: patientsService,
 	}

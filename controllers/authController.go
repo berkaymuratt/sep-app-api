@@ -7,16 +7,22 @@ import (
 )
 
 type AuthController struct {
-	authService     services.AuthService
-	jwtService      services.JwtService
-	patientsService services.PatientsService
-	doctorsService  services.DoctorsService
+	authService     services.AuthServiceI
+	jwtService      services.JwtServiceI
+	patientsService services.PatientsServiceI
+	doctorsService  services.DoctorsServiceI
 }
 
-func NewAuthService(authService services.AuthService, jwtService services.JwtService) AuthController {
+func NewAuthService(
+	authService services.AuthServiceI,
+	jwtService services.JwtServiceI,
+	patientsService services.PatientsServiceI,
+	doctorsService services.DoctorsServiceI) AuthController {
 	return AuthController{
-		authService: authService,
-		jwtService:  jwtService,
+		authService:     authService,
+		jwtService:      jwtService,
+		patientsService: patientsService,
+		doctorsService:  doctorsService,
 	}
 }
 

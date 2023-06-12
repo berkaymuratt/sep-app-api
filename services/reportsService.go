@@ -13,7 +13,16 @@ import (
 	"time"
 )
 
+//go:generate mockgen -destination=../mocks/service/mockReportsService.go -package=services github.com/berkaymuratt/sep-app-api/services ReportsServiceI
+type ReportsServiceI interface {
+	GetReportById(reportId primitive.ObjectID) (*dtos.ReportDto, error)
+	GetReports(doctorId *primitive.ObjectID, patientId *primitive.ObjectID) ([]*dtos.ReportDto, error)
+	CreateReportByAppointment(appointment *models.Appointment) error
+	DeleteReport(reportId primitive.ObjectID) error
+}
+
 type ReportsService struct {
+	ReportsServiceI
 	symptomsService SymptomsService
 	diseasesService DiseasesService
 }

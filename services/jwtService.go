@@ -5,7 +5,14 @@ import (
 	"time"
 )
 
+//go:generate mockgen -destination=../mocks/service/mockJwtService.go -package=services github.com/berkaymuratt/sep-app-api/services JwtServiceI
+type JwtServiceI interface {
+	GenerateJwtToken(userId string) (string, error)
+	CheckJwt(jwtToken string) (string, error)
+}
+
 type JwtService struct {
+	JwtServiceI
 	secretKey string
 }
 

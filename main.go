@@ -38,7 +38,7 @@ func main() {
 	appointmentsService := services.NewAppointmentsService(symptomsService)
 	diseasesService := services.NewDiseasesService(symptomsService)
 
-	authController := controllers.NewAuthService(authService, jwtService)
+	authController := controllers.NewAuthService(authService, jwtService, patientsService, doctorsService)
 	doctorsController := controllers.NewDoctorsController(doctorsService)
 	patientsController := controllers.NewPatientsController(patientsService)
 	reportsController := controllers.NewReportsController(reportsService)
