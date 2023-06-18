@@ -19,6 +19,7 @@ type ReportsServiceI interface {
 	GetReports(doctorId *primitive.ObjectID, patientId *primitive.ObjectID) ([]*dtos.ReportDto, error)
 	CreateReportByAppointment(appointment *models.Appointment) error
 	DeleteReport(reportId primitive.ObjectID) error
+	AddDoctorFeedback(reportId primitive.ObjectID, feedback string) error
 }
 
 type ReportsService struct {
@@ -122,6 +123,22 @@ func (service ReportsService) GetReports(doctorId *primitive.ObjectID, patientId
 	}
 
 	return reportsDtos, err
+}
+
+func (service ReportsService) AddDoctorFeedback(reportId primitive.ObjectID, feedback string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	coll := configs.GetCollection("reports")
+
+	update := bson.M{
+		"$set": bson.M{
+			"doctor_feedback": feedback,
+		},
+	}
+
+	_, err := coll.UpdateByID(ctx, reportId, update)
+	return err
 }
 
 func (service ReportsService) CreateReportByAppointment(appointment *models.Appointment) error {

@@ -8,4 +8,5 @@ func (routes Routes) defineReportsRoutes() {
 	reportsRoutes.Use(routes.middlewareService.Middleware)
 	reportsRoutes.Get("/", controller.GetReports)
 	reportsRoutes.Get("/:id", controller.GetReportById)
+	reportsRoutes.Post("/:id", controller.AddDoctorFeedback)
 }

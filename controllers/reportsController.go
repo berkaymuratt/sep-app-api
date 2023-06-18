@@ -70,3 +70,26 @@ func (controller ReportsController) GetReports(ctx *fiber.Ctx) error {
 		"reports": reports,
 	})
 }
+
+func (controller ReportsController) AddDoctorFeedback(ctx *fiber.Ctx) error {
+	idStr := ctx.Params("id")
+	feedback := ctx.Query("feedback")
+
+	reportId, err := primitive.ObjectIDFromHex(idStr)
+
+	if err != nil {
+		return handleError(ctx, "invalid report id")
+	}
+
+	if feedback == "" {
+		return handleError(ctx, "invalid feedback")
+	}
+
+	if err := controller.reportsService.AddDoctorFeedback(reportId, feedback); err != nil {
+		return handleError(ctx, err.Error())
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status": "successful",
+	})
+}
